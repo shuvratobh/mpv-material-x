@@ -79,6 +79,9 @@ defaults = {
 	proximity_out = 120,
 	total_time = false, -- deprecated by below
 	destination_time = 'playtime-remaining',
+	timeline_end_time = true,
+	timeline_end_time_format = '12h',
+	timeline_color = '008cfb',
 	time_precision = 0,
 	font_bold = false,
 	autohide = false,
@@ -379,6 +382,7 @@ state = {
 	max_seconds = nil, -- max seconds the time in timeline is expected to reach, accounted for speed
 	time_human = nil, -- current playback time in human format
 	destination_time_human = nil, -- depends on options.destination_time
+	end_time_human = nil, -- estimated clock finish time
 	pause = mp.get_property_native('pause'),
 	ime_active = mp.get_property_native('input-ime'),
 	chapters = {},
@@ -489,14 +493,39 @@ function update_human_times()
 			else
 				state.destination_time_human = format_time(state.time - state.duration, state.duration)
 			end
+
+			if options.timeline_end_time then
+				local remaining = math.max(0, (state.duration - state.time) / state.speed)
+				local end_epoch = os.time() + math.floor(remaining)
+				local time_str
+				if options.timeline_end_time_format == '24h' then
+					time_str = os.date('%H:%M', end_epoch)
+				else
+					time_str = os.date('%I:%M %p', end_epoch):gsub('^0', '')
+				end
+				state.end_time_human = 'Ends ' .. time_str
+			else
+				state.end_time_human = nil
+			end
 		else
 			state.destination_time_human = nil
+			state.end_time_human = nil
 		end
 		state.time_human = format_time(state.time, state.duration or state.time)
 	else
-		state.time_human, state.destination_time_human = nil, nil
+		state.time_human, state.destination_time_human, state.end_time_human = nil, nil, nil
 	end
 end
+
+mp.add_periodic_timer(1, function()
+	if state.time and state.duration and options.timeline_end_time then
+		local old = state.end_time_human
+		update_human_times()
+		if old ~= state.end_time_human and Elements.timeline and Elements.timeline:get_visibility() > 0 then
+			request_render()
+		end
+	end
+end)
 
 -- Notifies other scripts such as console about where the unoccupied parts of the screen are.
 function update_margins()

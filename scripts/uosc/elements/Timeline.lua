@@ -246,6 +246,11 @@ function Timeline:render()
 	local time_opts_base = {size = self.font_size, opacity = 1, border = 0}
 	local left_width = state.time_human and timestamp_width(state.time_human, time_opts_base) or 0
 	local right_width = state.destination_time_human and timestamp_width(state.destination_time_human, time_opts_base) or 0
+	if state.end_time_human and options.timeline_end_time then
+		local ends_opts_base = {size = round(self.font_size * 0.68), opacity = 1, border = 0}
+		local ends_width = text_width(state.end_time_human, ends_opts_base)
+		if ends_width > right_width then right_width = ends_width end
+	end
 	local text_margin = 15 * state.scale
 	
 	local left_padding = (left_width > 0) and (left_width + text_margin) * text_opacity or 0
@@ -290,9 +295,12 @@ function Timeline:render()
 		ass:smooth_curve(ax, ay, bx, by, self.heatmap, opts)
 	end
 	
+	local timeline_hex = (options.timeline_color or '008cfb'):gsub('^#', '')
+	local played_color = serialize_rgba(timeline_hex).color
+
 	-- Draw played progress
 	ass:rect(bax, fcy - played_thickness / 2, play_x, fcy + played_thickness / 2, {
-		color = '008cfb', opacity = config.opacity.position, radius = played_thickness / 2
+		color = played_color, opacity = config.opacity.position, radius = played_thickness / 2
 	})
 
 	-- Draw handle pill
@@ -300,7 +308,7 @@ function Timeline:render()
 	local handle_height = played_thickness + round(7 * state.scale)
 	if visibility > 0.1 then
 		ass:rect(play_x - handle_width/2, fcy - handle_height/2, play_x + handle_width/2, fcy + handle_height/2, {
-			color = '008cfb', opacity = config.opacity.position * (0.8 + 0.2 * visibility), radius = handle_width / 2
+			color = played_color, opacity = config.opacity.position * (0.8 + 0.2 * visibility), radius = handle_width / 2
 		})
 	end
 
@@ -396,7 +404,7 @@ function Timeline:render()
 				ass:new_event()
 				ass:append(string.format(
 					'{\\pos(0,0)\\rDefault\\an7\\blur0\\yshad0.01\\bord%f\\1c&H%s\\3c&H%s\\4c&H%s\\1a&H%X&\\3a&H00&\\4a&H00&}',
-					diamond_border, '008cfb', bg, bg, opacity_to_alpha(config.opacity.chapters)
+					diamond_border, played_color, bg, bg, opacity_to_alpha(config.opacity.chapters)
 				))
 				ass:draw_start()
 				ass:move_to(x, fby - ab_radius)
@@ -434,20 +442,36 @@ function Timeline:render()
 			local human = round(cache_duration) .. 's'
 			local width = text_width(human, cache_opts)
 			local time_width = timestamp_width(state.time_human, time_opts)
-			local time_width_end = timestamp_width(state.destination_time_human, time_opts)
+			local ends_width_cache = (state.end_time_human and options.timeline_end_time) and text_width(state.end_time_human, {size = round(self.font_size * 0.68), opacity = 1, border = 0}) or 0
+			local time_width_end = math.max(timestamp_width(state.destination_time_human, time_opts), ends_width_cache)
 			local min_x, max_x = self.ax + spacing + margin + time_width, self.bx - spacing - margin - time_width_end
 			if x < min_x then x = min_x elseif x + width > max_x then x, align = max_x, 6 end
 			draw_timeline_timestamp(x, fcy, align, human, cache_opts)
 		end
 
+		local has_end_time = state.end_time_human and options.timeline_end_time
+		local y_top = has_end_time and (fcy - round(self.font_size * 0.32)) or fcy
+		local y_bottom = has_end_time and (fcy + round(self.font_size * 0.44)) or fcy
+		local top_opts = has_end_time and {size = round(self.font_size * 0.88), opacity = text_opacity, border = 0} or time_opts
+
 		-- Elapsed time
 		if state.time_human then
-			draw_timeline_timestamp(self.ax + spacing, fcy, 4, state.time_human, time_opts)
+			draw_timeline_timestamp(self.ax + spacing, y_top, 4, state.time_human, top_opts)
 		end
 
 		-- End time
 		if state.destination_time_human then
-			draw_timeline_timestamp(self.bx - spacing, fcy, 6, state.destination_time_human, time_opts)
+			draw_timeline_timestamp(self.bx - spacing, y_top, 6, state.destination_time_human, top_opts)
+			if has_end_time then
+				local bottom_opts = {
+					size = round(self.font_size * 0.68),
+					opacity = text_opacity * 0.75,
+					color = 'ffffff',
+					border_color = '000000',
+					border = 1 * state.scale,
+				}
+				ass:txt(self.bx - spacing, y_bottom, 6, state.end_time_human, bottom_opts)
+			end
 		end
 	end
 
