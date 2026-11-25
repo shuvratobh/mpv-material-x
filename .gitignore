@@ -5,6 +5,7 @@ mpv.exe
 # Logs and debug files
 *.log
 *.txt
+!update_log.txt
 
 # MPV specific auto-generated or state files
 watch_later/

@@ -61,13 +61,22 @@ function Speed:render()
 	cursor:zone('wheel_up', self, function() self:handle_wheel_up() end)
 
 	local ass = assdraw.ass_new()
+	local is_hover = self.proximity_raw <= 0
+	local is_modified = math.abs((state.speed or 1) - 1) > 0.001
+	local accent = config.color.accent
 
-	-- Button background
+	-- Pill background
 	ass:rect(self.ax, self.ay, self.bx, self.by, {
-		color = bg,
+		color = is_hover and (is_modified and accent or fg) or bg,
 		radius = state.radius,
-		opacity = opacity * math.max(config.opacity.speed, 0.5),
+		opacity = opacity * (is_hover and 0.24 or math.max(config.opacity.speed, 0.45)),
+		border = is_modified and 1 or 0,
+		border_color = accent,
 	})
+
+	if is_hover then
+		ass:tooltip(self, t('Speed') .. ' (+0.1x / Right-click: 1x)')
+	end
 
 	-- Speed text label
 	local speed_text = (round(state.speed * 100) / 100) .. 'x'
@@ -75,7 +84,7 @@ function Speed:render()
 	local half_y = self.ay + self.height / 2
 	ass:txt(half_x, half_y, 5, speed_text, {
 		size = self.font_size,
-		color = bgt,
+		color = is_modified and accent or bgt,
 		bold = true,
 		border = options.text_border * state.scale,
 		border_color = bg,

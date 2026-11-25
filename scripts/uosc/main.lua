@@ -59,6 +59,7 @@ defaults = {
 	top_bar_alt_title = '',
 	top_bar_alt_title_place = 'below',
 	top_bar_flash_on = 'video,audio',
+	top_bar_clock = true,
 
 	window_border_size = 1,
 
@@ -81,7 +82,10 @@ defaults = {
 	destination_time = 'playtime-remaining',
 	timeline_end_time = true,
 	timeline_end_time_format = '12h',
+	timeline_hover_clock = true,
 	timeline_color = '008cfb',
+	night_mode = false,
+	remaster = true,
 	time_precision = 0,
 	font_bold = false,
 	autohide = false,
@@ -110,6 +114,12 @@ options = table_copy(defaults)
 function handle_options(changed_options)
 	if changed_options.time_precision then
 		timestamp_zero_rep_clear_cache()
+	end
+	if changed_options.night_mode ~= nil then
+		apply_night_mode(options.night_mode, true)
+	end
+	if changed_options.remaster ~= nil then
+		apply_remaster(options.remaster, true)
 	end
 	update_config()
 	update_human_times()
@@ -150,6 +160,7 @@ local config_defaults = {
 		error = serialize_rgba('ff616e').color,
 		match = serialize_rgba('69c5ff').color,
 		heatmap = serialize_rgba('00adee').color,
+		accent = serialize_rgba('008cfb').color,
 	},
 	opacity = {
 		timeline = 0.9,
@@ -282,6 +293,10 @@ function update_config()
 	))
 
 	-- Color
+	local timeline_hex = (options.timeline_color or '008cfb'):gsub('^#', '')
+	if #timeline_hex == 6 or #timeline_hex == 8 then
+		config_defaults.color.accent = serialize_rgba(timeline_hex).color
+	end
 	config.color = table_assign({}, config_defaults.color, serialize_key_value_list(options.color, function(value)
 		return serialize_rgba(value).color
 	end))
@@ -300,7 +315,33 @@ function update_config()
 	-- Other
 	update_load_types()
 end
+function apply_night_mode(enabled, notify)
+	if enabled then
+		mp.commandv('af', 'add', '@night_mode:lavfi=[dynaudnorm=f=75:g=25:p=0.55]')
+		if notify then mp.osd_message('🌙 Night Mode: ON (Voice Boost)', 2) end
+	else
+		mp.commandv('af', 'remove', '@night_mode')
+		if notify then mp.osd_message('🔊 Night Mode: OFF', 2) end
+	end
+end
+function apply_remaster(enabled, notify)
+	if enabled then
+		mp.set_property_number('target-peak', 140)
+		mp.set_property_number('brightness', 0)
+		mp.set_property_number('contrast',4)
+		mp.set_property_number('saturation', 5)
+		if notify then mp.osd_message('✨ Remaster: ON (Peak 140, Sat +5, Contrast +5)', 2) end
+	else
+		mp.set_property('target-peak', 'auto')
+		mp.set_property_number('brightness', 0)
+		mp.set_property_number('contrast', 0)
+		mp.set_property_number('saturation', 0)
+		if notify then mp.osd_message('🎬 Remaster: OFF (Original)', 2) end
+	end
+end
 update_config()
+if options.night_mode then apply_night_mode(true, false) end
+if options.remaster then apply_remaster(true, false) end
 
 -- Default menu items
 function create_default_menu_items()
@@ -383,6 +424,7 @@ state = {
 	time_human = nil, -- current playback time in human format
 	destination_time_human = nil, -- depends on options.destination_time
 	end_time_human = nil, -- estimated clock finish time
+	clock_human = nil, -- current local clock time
 	pause = mp.get_property_native('pause'),
 	ime_active = mp.get_property_native('input-ime'),
 	chapters = {},
@@ -482,8 +524,16 @@ function update_duration()
 	update_human_times()
 end
 
+function format_clock_time(epoch)
+	if options.timeline_end_time_format == '24h' then
+		return os.date('%H:%M', epoch)
+	end
+	return (os.date('%I:%M %p', epoch):gsub('^0', ''))
+end
+
 function update_human_times()
 	state.speed = state.speed or 1
+	state.clock_human = options.top_bar_clock and format_clock_time(os.time()) or nil
 	if state.time then
 		if state.duration then
 			if options.destination_time == 'playtime-remaining' then
@@ -496,14 +546,7 @@ function update_human_times()
 
 			if options.timeline_end_time then
 				local remaining = math.max(0, (state.duration - state.time) / state.speed)
-				local end_epoch = os.time() + math.floor(remaining)
-				local time_str
-				if options.timeline_end_time_format == '24h' then
-					time_str = os.date('%H:%M', end_epoch)
-				else
-					time_str = os.date('%I:%M %p', end_epoch):gsub('^0', '')
-				end
-				state.end_time_human = 'Ends ' .. time_str
+				state.end_time_human = 'Ends ' .. format_clock_time(os.time() + math.floor(remaining))
 			else
 				state.end_time_human = nil
 			end
@@ -518,12 +561,12 @@ function update_human_times()
 end
 
 mp.add_periodic_timer(1, function()
-	if state.time and state.duration and options.timeline_end_time then
-		local old = state.end_time_human
-		update_human_times()
-		if old ~= state.end_time_human and Elements.timeline and Elements.timeline:get_visibility() > 0 then
-			request_render()
-		end
+	local old_end, old_clock = state.end_time_human, state.clock_human
+	update_human_times()
+	local timeline_dirty = old_end ~= state.end_time_human and Elements.timeline and Elements.timeline:get_visibility() > 0
+	local top_bar_dirty = old_clock ~= state.clock_human and Elements.top_bar and Elements.top_bar:get_visibility() > 0
+	if timeline_dirty or top_bar_dirty then
+		request_render()
 	end
 end)
 
@@ -984,6 +1027,14 @@ end)
 bind_command('stream-quality', open_stream_quality_menu)
 bind_command('open-file', open_open_file_menu)
 bind_command('shuffle', function() set_state('shuffle', not state.shuffle) end)
+bind_command('night-mode', function()
+	options.night_mode = not options.night_mode
+	handle_options({night_mode = options.night_mode})
+end)
+bind_command('remaster', function()
+	options.remaster = not options.remaster
+	handle_options({remaster = options.remaster})
+end)
 bind_command('items', function()
 	if state.has_playlist then
 		mp.command('script-binding uosc/playlist')

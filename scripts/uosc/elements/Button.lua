@@ -58,16 +58,15 @@ function Button:render()
 	local ass = assdraw.ass_new()
 	local is_clickable = self.is_clickable and self.on_click ~= nil
 	local is_hover = self.proximity_raw <= 0
-	-- Active state: icon uses accent color, no background fill (matches ModernZ flat style)
 	local icon_color = self.active and config.color.accent or self.foreground
-	local background_opacity = self.active and 0 or config.opacity.controls
+	local background_opacity = self.active and (is_hover and 0.16 or 0.08) or config.opacity.controls
 
-	if is_hover and is_clickable and background_opacity < 0.3 then background_opacity = 0.3 end
+	if is_hover and is_clickable and background_opacity < 0.18 then background_opacity = 0.18 end
 
-	-- Background (hover only when not active)
+	-- Background pill (subtle frosted hover / active highlight)
 	if background_opacity > 0 then
 		ass:rect(self.ax, self.ay, self.bx, self.by, {
-			color = is_hover and icon_color or self.background,
+			color = (self.active or is_hover) and icon_color or self.background,
 			radius = state.radius,
 			opacity = visibility * background_opacity,
 		})
@@ -79,24 +78,25 @@ function Button:render()
 	-- Badge
 	local icon_clip
 	if self.badge then
-		local badge_font_size = self.font_size * 0.6
-		local badge_opts = {size = badge_font_size, color = self.background, opacity = visibility}
+		local badge_font_size = self.font_size * 0.56
+		local badge_opts = {size = badge_font_size, color = self.background, bold = true, opacity = visibility}
 		local badge_width = text_width(self.badge, badge_opts)
-		local width, height = math.ceil(badge_width + (badge_font_size / 7) * 2), math.ceil(badge_font_size * 0.93)
+		local width, height = math.ceil(badge_width + (badge_font_size / 4) * 2), math.ceil(badge_font_size * 1.05)
 		local bx, by = self.bx - 1, self.by - 1
+		local badge_radius = math.min(state.radius, math.floor(height / 2))
 		ass:rect(bx - width, by - height, bx, by, {
 			color = icon_color,
-			radius = state.radius,
+			radius = badge_radius,
 			opacity = visibility,
 			border = self.active and 0 or 1,
 			border_color = self.background,
 		})
 		ass:txt(bx - width / 2, by - height / 2, 5, self.badge, badge_opts)
 
-		local clip_border = math.max(self.font_size / 20, 1)
+		local clip_border = math.max(self.font_size / 18, 1.5)
 		local clip_path = assdraw.ass_new()
 		clip_path:round_rect_cw(
-			math.floor((bx - width) - clip_border), math.floor((by - height) - clip_border), bx, by, 3
+			math.floor((bx - width) - clip_border), math.floor((by - height) - clip_border), bx, by, badge_radius
 		)
 		icon_clip = '\\iclip(' .. clip_path.scale .. ', ' .. clip_path.text .. ')'
 	end

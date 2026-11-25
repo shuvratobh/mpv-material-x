@@ -1,0 +1,54 @@
+====================================================================
+MPV: UOSC x Modern Z Edition — Update Log
+Date: 2026-11-25
+====================================================================
+
+[UI & Visual Polish]
+- Timeline (Timeline.lua / uosc.conf):
+  * Restored slim, razor-sharp seekbar (1.5px base / 2px played, timeline_size=25)
+    with muted gray unwatched track vs. bright #008cfb watched progress.
+  * Added crisp dark halo border around the scrubber knob and subtle scrub dot
+    when hovering directly on the seekbar.
+  * Repositioned sky-cyan chapter diamonds cleanly above the track.
+  * Added estimated finish clock time to the seekbar hover tooltip
+    (timeline_hover_clock=yes).
+  * Fixed chapter_range_patterns substring matching so chapters don't paint the
+    entire unwatched bar blue.
+- Top Bar (TopBar.lua / uosc.conf):
+  * Added smooth feathered top gradient shadow for readability over bright scenes.
+  * Added live real-time clock badge next to window controls (top_bar_clock=yes).
+  * Updated frosted glass pill styling (border_radius=6, translucent title/tooltip).
+- Controls & Buttons (Controls.lua / Button.lua / CycleButton.lua / Speed.lua / main.lua):
+  * Fixed missing config.color.accent definition so active toggle icons stay
+    lit in #008cfb light blue.
+  * True-centered middle playback controls (prev, -10s, play/pause, +10s, next)
+    at 50% screen width regardless of left/right button counts.
+  * Upgraded button hover states, rounded count badges, and light-blue active
+    highlight for the Speed pill when playback speed != 1.0x.
+
+[New Features]
+- Remaster Vivid Toggle (uosc/remaster, Alt+r, Sparkle button):
+  * Enabled by default (remaster=yes in uosc.conf).
+  * Applies target-peak=140, brightness=0, contrast=4, saturation=5; toggles
+    cleanly back to auto/0 on click or Alt+r.
+- Night Mode / Voice Boost (uosc/night-mode, Alt+n, Moon button):
+  * Toggles dynaudnorm audio normalization (@night_mode:lavfi=[dynaudnorm=f=75:g=25:p=0.55])
+    to lift quiet dialogue and tame loud peaks.
+- Binge Mode (uosc.conf / mpv.conf):
+  * Switched from folder-dumping autoload.lua to uosc native autoload=yes with
+    keep-open=yes and keep-open-pause=no — auto-plays the next file in the
+    folder without cluttering the playlist.
+- Lightweight Skip Intro (scripts/skip-intro.lua / script-opts/skip-intro.conf):
+  * Replaced heavy 100x silencedetect/blackout filter script with zero-overhead
+    chapter-based Netflix-style Skip Intro banner (Tab / z, 85s fallback).
+  * Original script safely backed up to backups/skip-intro.original.lua &
+    backups/skip-intro.original.conf.
+
+[Performance & Bloat Cleanup]
+- Removed deprecated tone-mapping-mode=auto from mpv.conf.
+- Removed unknown/deprecated keys from uosc.conf.
+- Removed dead/duplicate scripts and configs: scripts/lock.lua,
+  scripts/copy-paste-URL.lua, scripts/menu.lua, script-opts/menu.json,
+  scripts/select.lua, scripts/autoload.lua, script-opts/autoload.conf,
+  script-opts/SmartCopyPaste.lua, script-opts/uosc_history.conf.
+====================================================================

@@ -232,6 +232,19 @@ function TopBar:render()
 	local ax, ay, bx, by = self.ax, self.ay, self.bx, self.ay + self.size
 	local margin = math.floor((self.size - self.font_size) / 4)
 
+	-- Smooth top feathered gradient shadow for legibility over bright scenes
+	local grad_h = math.max(round(self.size * 2.2), round(48 * state.scale))
+	local blur_r = round(grad_h * 0.55)
+	local alpha_byte = math.floor((1 - 0.65 * visibility) * 255)
+	ass:new_event()
+	ass.text = ass.text .. string.format(
+		'{\\pos(0,0)\\an7\\blur%d\\bord0\\1c&H000000&\\1a&H%X&\\3a&HFF&\\4a&HFF&}',
+		blur_r, alpha_byte
+	)
+	ass:draw_start()
+	ass:rect_cw(-blur_r * 2, -blur_r * 2, display.width + blur_r * 2, self.ay + round(self.size * 0.9))
+	ass:draw_stop()
+
 	-- Window controls
 	if options.top_bar_controls then
 		local is_left, button_ax = options.top_bar_controls == 'left', 0
@@ -269,6 +282,29 @@ function TopBar:render()
 
 			button_ax = button_ax + self.size
 		end
+	end
+
+	-- Live clock badge next to window controls
+	if options.top_bar_clock and state.clock_human then
+		local clock_padding = round(self.font_size * 0.55)
+		local clock_opts = {
+			size = round(self.font_size * 0.92),
+			color = bgt,
+			bold = true,
+			opacity = visibility * 0.9,
+			border = options.text_border * state.scale,
+			border_color = bg,
+		}
+		local clock_w = round(text_width(state.clock_human, clock_opts) + clock_padding * 2)
+		local left_controls = options.top_bar_controls == 'left'
+		local clock_ax = left_controls and (ax + margin) or (bx - margin - clock_w)
+		local clock_bx = clock_ax + clock_w
+		local clock_ay, clock_by = self.ay + margin, by - margin
+		ass:rect(clock_ax, clock_ay, clock_bx, clock_by, {
+			color = bg, opacity = visibility * config.opacity.title, radius = state.radius,
+		})
+		ass:txt(clock_ax + clock_w / 2, clock_ay + (clock_by - clock_ay) / 2, 5, state.clock_human, clock_opts)
+		if left_controls then ax = clock_bx else bx = clock_ax end
 	end
 
 	-- Window title

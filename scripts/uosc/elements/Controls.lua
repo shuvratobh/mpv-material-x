@@ -86,6 +86,8 @@ function Controls:init_options()
 		['loop-file'] = 'cycle:' .. fi.loop_off .. ':loop-file:no/inf=' .. fi.loop_on .. '?' .. t('Loop file'),
 		shuffle = 'toggle:' .. fi.shuffle_off .. ':shuffle?' .. t('Shuffle'),
 		autoload = 'toggle:' .. fi.hdr .. ':autoload@uosc?' .. t('Autoload'),
+		['night-mode'] = 'toggle:bedtime:night_mode@uosc?' .. t('Night Mode (Voice Boost)'),
+		remaster = 'toggle:auto_awesome:remaster@uosc?' .. t('Remaster Vivid (Peak 130 / Sat +8)'),
 		fullscreen = 'cycle:' .. fi.fullscreen .. ':fullscreen:no/yes=' .. fi.fullscreen_x .. '?' .. t('Fullscreen'),
 		-- Custom jump shorthands (used in uosc.conf controls line)
 		replay_10 = 'command:' .. fi.jump_back .. ':seek -10?-10s',
@@ -235,7 +237,6 @@ function Controls:init_options()
 					on_wheel_up = on_wheel_up_fn,
 					on_wheel_down = on_wheel_down_fn,
 					tooltip = tooltip,
-					count_prop = 'sub',
 				})
 				table_assign(control, {element = element, sizing = 'static', scale = 1, ratio = 1})
 				if badge then self:register_badge_updater(badge, element) end
@@ -475,13 +476,14 @@ function Controls:update_dimensions()
 	local width_for_gaps = math.min(empty_space_width, size * gaps)
 	local individual_space_width = spaces > 0 and ((empty_space_width - width_for_gaps) / spaces) or 0
 
+	local visible_items, space_indices = {}, {}
 	for c, control in ipairs(self.layout) do
 		if not control.hide then
 			local sizing, element, scale, ratio = control.sizing, control.element, control.scale, control.ratio
 			local width, height = 0, 0
-
 			if sizing == 'space' then
 				if individual_space_width > 0 then width = individual_space_width end
+				space_indices[#space_indices + 1] = #visible_items + 1
 			elseif sizing == 'gap' then
 				if width_for_gaps > 0 then width = width_for_gaps * (ratio / gaps) end
 			elseif sizing == 'static' then
@@ -492,11 +494,47 @@ function Controls:update_dimensions()
 				width = max_dynamics_width < width_for_dynamics
 					and height * ratio or width_for_dynamics * ((scale * ratio) / dynamic_units)
 			end
-
-			local bx = current_x + width
-			if element then element:set_coordinates(round(current_x), round(self.by - height), bx, self.by) end
-			current_x = element and bx + spacing or bx
+			visible_items[#visible_items + 1] = {
+				control = control,
+				width = width,
+				height = height,
+				step = width + (element and spacing or 0),
+			}
 		end
+	end
+
+	-- True-center the middle group when flanked by two `space` items
+	if #space_indices == 2 then
+		local s1, s2 = space_indices[1], space_indices[2]
+		local left_total, center_total, right_total = 0, 0, 0
+		for i = 1, s1 - 1 do left_total = left_total + visible_items[i].step end
+		for i = s1 + 1, s2 - 1 do center_total = center_total + visible_items[i].step end
+		for i = s2 + 1, #visible_items do right_total = right_total + visible_items[i].step end
+
+		local center_visual_w = center_total
+		for i = s2 - 1, s1 + 1, -1 do
+			if visible_items[i].control.element then
+				center_visual_w = center_visual_w - spacing
+				break
+			else
+				center_visual_w = center_visual_w - visible_items[i].step
+			end
+		end
+
+		local target_center_ax = round(self.ax + (available_width - center_visual_w) / 2)
+		local min_center_ax = self.ax + left_total
+		local max_center_ax = self.ax + available_width - right_total - center_total
+		local actual_center_ax = clamp(min_center_ax, target_center_ax, math.max(min_center_ax, max_center_ax))
+		visible_items[s1].step = math.max(0, actual_center_ax - min_center_ax)
+		visible_items[s2].step = math.max(0, (self.ax + available_width - right_total) - (actual_center_ax + center_total))
+	end
+
+	for _, item in ipairs(visible_items) do
+		local element = item.control.element
+		if element then
+			element:set_coordinates(round(current_x), round(self.by - item.height), current_x + item.width, self.by)
+		end
+		current_x = current_x + item.step
 	end
 
 	Elements:update_proximities()

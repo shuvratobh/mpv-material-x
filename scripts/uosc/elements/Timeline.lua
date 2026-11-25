@@ -237,7 +237,7 @@ function Timeline:render()
 	local tooltip_gap = round(2 * state.scale)
 	local timestamp_gap = tooltip_gap
 
-	local spacing = math.max(math.floor((self.size - self.font_size) / 2.5), 4)
+	local spacing = math.max(math.floor((self.size - self.font_size) / 2.5), round(10 * state.scale))
 	local progress = state.time / state.duration
 
 	local box_ax, bay, box_bx, bby = self.ax, self.by - size - self.top_border, self.bx, self.by
@@ -251,10 +251,10 @@ function Timeline:render()
 		local ends_width = text_width(state.end_time_human, ends_opts_base)
 		if ends_width > right_width then right_width = ends_width end
 	end
-	local text_margin = 15 * state.scale
+	local text_margin = 16 * state.scale
 	
-	local left_padding = (left_width > 0) and (left_width + text_margin) * text_opacity or 0
-	local right_padding = (right_width > 0) and (right_width + text_margin) * text_opacity or 0
+	local left_padding = (left_width > 0) and (left_width + spacing + text_margin) * text_opacity or 0
+	local right_padding = (right_width > 0) and (right_width + spacing + text_margin) * text_opacity or 0
 
 	local bax, bbx = box_ax + left_padding, box_bx - right_padding
 	self._bax = bax
@@ -277,9 +277,9 @@ function Timeline:render()
 
 	local play_x = t2x(state.time)
 	
-	-- Draw base right part
+	-- Draw unwatched base track (muted neutral gray so watched blue stands out clearly)
 	ass:rect(bax, fcy - base_thickness / 2, bbx, fcy + base_thickness / 2, {
-		color = '4f7594', opacity = config.opacity.timeline, radius = base_thickness / 2
+		color = '6e7681', opacity = 0.38, radius = base_thickness / 2
 	})
 
 	-- Youtube heatmap
@@ -303,12 +303,21 @@ function Timeline:render()
 		color = played_color, opacity = config.opacity.position, radius = played_thickness / 2
 	})
 
-	-- Draw handle pill
-	local handle_width = played_thickness + round(7 * state.scale)
-	local handle_height = played_thickness + round(7 * state.scale)
+	-- Subtle scrub dot only when directly hovering the timeline track
+	if self.is_hovered and not self.pressed and visibility > 0.1 and not Elements:v('speed', 'dragging') then
+		local hover_x = clamp(bax, cursor.x, bbx)
+		ass:circle(hover_x, fcy, played_thickness * 0.9, {color = fg, opacity = 0.8 * visibility})
+	end
+
+	-- Draw handle pill with subtle dark halo border
+	local handle_size = played_thickness + round(6 * state.scale)
 	if visibility > 0.1 then
-		ass:rect(play_x - handle_width/2, fcy - handle_height/2, play_x + handle_width/2, fcy + handle_height/2, {
-			color = played_color, opacity = config.opacity.position * (0.8 + 0.2 * visibility), radius = handle_width / 2
+		ass:rect(play_x - handle_size / 2, fcy - handle_size / 2, play_x + handle_size / 2, fcy + handle_size / 2, {
+			color = played_color,
+			opacity = config.opacity.position * (0.85 + 0.15 * visibility),
+			border = 1.2 * state.scale,
+			border_color = bg,
+			radius = handle_size / 2,
 		})
 	end
 
@@ -344,12 +353,13 @@ function Timeline:render()
 		local diamond_border = options.timeline_border and math.max(options.timeline_border, 1) or 1
 
 		if diamond_radius > 0 then
+			local chapter_y = fcy - played_thickness / 2 - diamond_radius - round(2 * state.scale)
 			local function draw_chapter(time, radius)
-				local chapter_x, chapter_y = t2x(time), fay - 1
+				local chapter_x = t2x(time)
 				ass:new_event()
 				ass:append(string.format(
 					'{\\pos(0,0)\\rDefault\\an7\\blur0\\yshad0.01\\bord%f\\1c&H%s\\3c&H%s\\4c&H%s\\1a&H%X&\\3a&H00&\\4a&H00&}',
-					diamond_border, 'ffff00', bg, bg, opacity_to_alpha(config.opacity.chapters)
+					diamond_border, 'ffcc00', bg, bg, opacity_to_alpha(config.opacity.chapters)
 				))
 				ass:draw_start()
 				ass:move_to(chapter_x - radius, chapter_y)
@@ -365,7 +375,7 @@ function Timeline:render()
 
 				if self.proximity_raw < diamond_radius_hovered then
 					for i, chapter in ipairs(state.chapters) do
-						local chapter_x, chapter_y = t2x(chapter.time), fay - 1
+						local chapter_x = t2x(chapter.time)
 						local cursor_chapter_delta = math.sqrt((cursor.x - chapter_x) ^ 2 + (cursor.y - chapter_y) ^ 2)
 						if cursor_chapter_delta <= diamond_radius_hovered and cursor_chapter_delta < closest_delta then
 							hovered_chapter, closest_delta = chapter, cursor_chapter_delta
@@ -376,7 +386,7 @@ function Timeline:render()
 
 				for i, chapter in ipairs(state.chapters) do
 					if chapter ~= hovered_chapter then draw_chapter(chapter.time, diamond_radius) end
-					local circle = {point = {x = t2x(chapter.time), y = fay - 1}, r = diamond_radius_hovered}
+					local circle = {point = {x = t2x(chapter.time), y = chapter_y}, r = diamond_radius_hovered}
 					if visibility > 0 and chapter == hovered_chapter then
 						cursor:zone('primary_down', circle, function()
 							mp.commandv('seek', chapter.time, 'absolute+exact')
@@ -483,13 +493,21 @@ function Timeline:render()
 		local ax, ay, bx, by = cursor_x - 0.5, fay, cursor_x + 0.5, fby
 		local tooltip_anchor = {ax = ax, ay = ay - self.top_border, bx = bx, by = by}
 
-		-- Timestamp
+		-- Timestamp (with estimated finish clock time at cursor)
 		local opts = {
 			size = self.font_size, offset = timestamp_gap, margin = tooltip_gap, timestamp = options.time_precision > 0,
 		}
 		local hovered_time_human = format_time(hovered_seconds, state.duration)
-		opts.width_overwrite = timestamp_width(hovered_time_human, opts)
-		tooltip_anchor = ass:tooltip(tooltip_anchor, hovered_time_human, opts)
+		local tooltip_text = hovered_time_human
+		if options.timeline_hover_clock and state.duration and state.time then
+			local end_if_here = math.max(0, (state.duration - hovered_seconds) / (state.speed or 1))
+			tooltip_text = hovered_time_human .. '  •  Ends ' .. format_clock_time(os.time() + math.floor(end_if_here))
+			opts.timestamp = false
+			opts.width_overwrite = text_width(tooltip_text, opts)
+		else
+			opts.width_overwrite = timestamp_width(hovered_time_human, opts)
+		end
+		tooltip_anchor = ass:tooltip(tooltip_anchor, tooltip_text, opts)
 
 		-- Thumbnail
 		if not thumbnail.disabled
