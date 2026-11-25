@@ -3,6 +3,26 @@ MPV: UOSC x Modern Z Edition — Full Repository Update Log
 ====================================================================
 
 --------------------------------------------------------------------
+[12] 2026-11-26
+feat!: v2.0 Material OSC Revolution — custom Material UI, Subtitle Sync Suite & per-file persistence, Remaster/Night Mode, Dynamic End Time
+--------------------------------------------------------------------
+- Frontend UI Migration to Material OSC (`scripts/material-osc.lua`, `script-opts/material-osc.conf`, `fonts/`):
+  * Replaced uosc frontend with customized Material OSC (`#008cfb` accent, Google Sans Flex & Material Symbols fonts); preserved original uosc build locally in `backups/uosc-original-build/`.
+  * Top Bar & Layout: Added frosted Top Bar media title pill (`draw_dynamic`), removed redundant upper title row for an unobstructed seekbar, hid mini seekbar in fullscreen (windowed-only), removed PiP & broken context menu, and disabled `±5s` edge-seek overlay (`seeking_zone_percentage=0`).
+  * Left-Side Utility Pills: Moved Gear Settings (`node.settings`, single-press, anchored left) and Playlist drawer (`node.playlist`, `Alt+p`) to bottom-left pill (`[Gear | Playlist]`).
+  * Dynamic Finish Clock: Added speed-aware `"• Ends X:XX PM"` real-world finish time in the time pill (updates live during playback & while paused).
+  * Right-Side Action Pill: Added History button (`schedule` -> `SimpleHistory/open-list`), Night Mode / Voice Boost (`record_voice_over`, `Alt+n`), Remaster Vivid (`bolt_boost`, `Alt+r`, manual-only default OFF), Bookmark (`bookmark_add`, `B`), and Screenshot (`photo_camera`, `osd-msg screenshot` showing save path).
+- Subtitle Delay & Sync Suite (`SubtitleStylePopup` + persistent JSON storage):
+  * Inside Gear -> Subtitles -> Subtitle Settings: added `Type` Windows input dialog for exact second entry (e.g. `-10`, `+4.5`), smooth `-30s..+30s` drag slider, and single-touch **Voice Heard / Subtitle Seen** tap-to-sync buttons.
+  * Added persistent per-file `sub-delay` storage (`material-osc-sub-sync.json`) with debounced save, shutdown flush, and automatic restore on `file-loaded`.
+- Controls & History Stability (`input.conf`, `SimpleHistory.lua`, `SimpleHistory.conf`):
+  * Disabled left-click play/pause (`single_click_actions_enabled=no`) and bound `MBTN_RIGHT cycle pause` in `input.conf`.
+  * Hardened `SimpleHistory.lua` against malformed/missing lines, auto-skipped invalid entries during startup auto-resume, and blacklisted synthetic `av://` / `lavfi:` streams.
+- Documentation & Repo Hygiene:
+  * Updated `README.md` for v2.0 Material OSC Revolution Edition and excluded local runtime JSON state & backup snapshots in `.gitignore`.
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
 [11] 2026-11-25 | Commit: 0fd199c
 feat: polish uosc UI, fix seekbar contrast, add Remaster & Night Mode, clean bloat, add update_log.txt
 --------------------------------------------------------------------

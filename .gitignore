@@ -11,6 +11,11 @@ mpv.exe
 watch_later/
 lua-settings/
 mpvHistory.log
+material-osc-bookmarks.json
+material-osc-easter-eggs.json
+material-osc-sub-sync.json
+backups/uosc-original-build/
+backups/material-osc.original.lua
 
 # Temporary files
 /tmp/

@@ -1,43 +1,50 @@
-# MPV: UOSC x Modern Z Edition
+# MPV: Material OSC Revolution Edition (v2.0)
 
-This repository contains my personal, heavily-customized setup for the [MPV media player](https://mpv.io/). It brings together the powerful functionality of **UOSC** with the sleek, premium aesthetics of **Modern Z** to create the ultimate viewing experience.
+> **Evolution Notice (v2.0):** This repository evolved from the **UOSC × Modern Z** build into a custom-engineered **Material OSC** frontend — preserving all shaders, `SimpleHistory` auto-resume, `Thumbfast` previews, and hotkeys while upgrading every control into a responsive Material Design 3 interface. See [update_log.txt](update_log.txt) for the full commit-by-commit changelog from v1 to v2.
 
-## 📸 Media Preview
+A heavily customized, GPU-accelerated setup for the [mpv media player](https://mpv.io/) on Windows (`vo=gpu`, `gpu-api=vulkan`, `hwdec=nvdec`).
 
-> **Note:** Please replace the `link-to-video.mp4` and `link-to-screenshot.png` below with the actual paths to your files once you upload them to the repository!
+---
 
+## ✨ What's New in v2.0
 
+### 🎨 Custom Material OSC Interface
+- **Top-Left Frosted Media Title Pill:** Displays the current video title cleanly at the top-left of the frame and fades smoothly with the controller.
+- **Unobstructed Seekbar & Windowed Mini-Bar:** Clean `#008cfb` accent seekbar with `Thumbfast` thumbnail previews; mini bottom progress bar appears only when windowed and hides in fullscreen.
+- **Dynamic Finish Clock (`Ends X:XX PM`):** Live speed-aware finish time shown alongside elapsed/remaining time, continuing to update even while paused.
+- **Bottom-Left Utility Pill (`[Gear | Playlist]`):**
+  - **Settings (`Gear`):** Single-click opens Video, Audio, Subtitles, and Playback Speed controls anchored cleanly on the left.
+  - **Playlist (`playlist_play` / `Alt+p`):** Opens the interactive Material folder & playlist drawer (add files, add links, reorder, or drag).
+- **Bottom-Right Action Pill:**
+  - **History (`schedule` / `h`):** Opens `SimpleHistory` directly from the player bar.
+  - **Subtitles (`subtitles`):** Toggle/cycle tracks or open full subtitle management.
+  - **Night Mode / Voice Boost (`record_voice_over` / `Alt+n`):** Toggles `dynaudnorm` vocal clarity compression (`@night_mode`).
+  - **Remaster Vivid (`bolt_boost` / `Alt+r`):** Manual-only toggle (`target-peak=140`, `contrast=+4`, `saturation=+5`) — stays off until enabled.
+  - **Bookmark (`bookmark_add` / `B`):** One-click timeline bookmarking (`Bookmark N >` chapter chips).
+  - **Screenshot (`photo_camera` / `s`):** Captures with subtitles to `X:/Screenshots` (`mpv-%f-%n`) and prints the saved path via `osd-msg`.
+  - **Fullscreen (`fullscreen`):** Toggle fullscreen without PiP clutter.
+- **Clean Mouse Behavior:** Right-click toggles Play/Pause (`MBTN_RIGHT cycle pause`), left-click play/pause and `±5s` accidental edge-seek overlays disabled.
 
+---
 
-### UI Screenshot
-![UI Screenshot]([link-to-screenshot.png](https://s6.imgcdn.dev/YSuhYV.png))
+## 💬 Built-In Subtitle Delay & Sync Suite
+Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`)**:
+1. **Manual Exact Input (`Type` button):** Enter any delay in seconds (e.g. `-10`, `+4.5`, `0`) via an always-on-top dialog (`-300s` to `+300s`).
+2. **Smooth Sync Slider:** Drag seamlessly across `-30s` to `+30s` (plus `±0.1s` step buttons).
+3. **Two-Tap Audio/Subtitle Sync:** Tap **Voice Heard** when dialogue starts and **Subtitle Seen** when text appears (in either order) to calculate and apply the exact offset automatically.
+4. **Persistent Per-File Memory:** Any adjusted `sub-delay` is saved automatically per file (`material-osc-sub-sync.json`) and restored the next time you open that video.
 
-## 🌟 Key Features
+---
 
-### 🎨 UOSC x Modern Z Combined Interface
-This setup runs on a highly modified fork of [uosc](https://github.com/tomasklaen/uosc), re-imagined with the design language of Modern Z:
-*   **Stunning Timeline:** A customized thin, rounded, and elegant timeline with a subtle hover-expansion animation, matching modern design aesthetics. It features a rich dark gradient shadow, floating rounded buttons, and minimalistic font styles.
-*   **Refined Control Layout:** Perfectly centered and symmetrical bottom controls using flawless Modern Z iconography to mimic premium video platforms. All active states and button flashes are thoughtfully integrated into the primary color scheme.
-*   **Enhanced UX & Menus:** Click anywhere seamlessly! Left or right-clicking outside of menus and playlists immediately dismisses them, keeping your view completely clear without relying solely on quick keyboard escapes.
+## 🧰 Scripts, History & Shaders
+- **Resilient `SimpleHistory` Auto-Resume:** Automatically resumes your last watched video on launch, skips missing/unsupported entries safely, and blacklists synthetic `av://` / `lavfi:` streams.
+- **Lightweight `skip-intro.lua` (`Tab` / `z`):** Chapter-aware Skip Intro overlay with minimal overhead.
+- **Shaders (`Ctrl+1` / `Ctrl+2` / `Ctrl+3` / `j`):** Anime4K, FSRCNNX / KrigBilateral / SSimSuperRes, NVScaler + FilmGrain-Light.
+- **`playlistmanager.lua`, `SmartCopyPaste.lua`, `trackselect.lua`, `webm.lua`, `thumbfast.lua`.**
 
-### 🕒 Seamless History & Resume (SimpleHistory)
-*   **Auto-Resume Support:** Remembers exactly where you left off on any file, seamlessly prompting or automatically resuming position upon player load.
-*   **On-Demand History Menu:** Quickly peek at your recently watched media simply by pressing `h`.
+---
 
-### 🧰 Powerful Quality of Life Scripts
-*   **Smart Folder Autoload:** Instantly queues all video files in the same directory for seamless next/prev file navigation without scanning slow subdirectories.
-*   **Audio/Subtitle Quick-Switching:** Simply scroll your mouse wheel over the Audio or Subtitle buttons to instantly cycle tracks, or click to advance.
-*   **Thumbfast:** High-performance, on-the-fly thumbnail generation while hovering over the timeline.
-*   **PlaylistManager 2:** Robust handling of extensive playlists.
-*   **Skip Intro:** Auto-skips anime and TV show intros dynamically.
-*   **SmartCopyPaste 2:** Elegant clipboard integration perfect for pasting network streams.
-*   **WebM Maker:** Integrated WebM encoding right from the MPV playback window.
-
-### 🎥 High-End Shaders
-*   **NVScaler:** High-quality spatial upscaling.
-*   **FilmGrain-Light:** Subtle cinematic grain application to prevent color banding in dark scenes and improve visual fidelity.
-
-## ⚙️ How to Install
-1. Make sure you install the latest build of MPV for Windows in your preferred directory.
-2. Clone or download this repository directly into your `%AppData%\mpv` folder (e.g. `C:\Users\Username\AppData\Roaming\mpv`).
-3. Enjoy your modernized viewing experience!
+## ⚙️ Installation (Windows)
+1. Install a recent **mpv** Windows build with Vulkan/FFmpeg support.
+2. Clone this repository into `%AppData%\mpv` (`C:\Users\<Username>\AppData\Roaming\mpv`).
+3. Update `screenshot-directory` in [mpv.conf](mpv.conf) if you don't use `X:/Screenshots`.

@@ -464,12 +464,13 @@ function read_log_table()
 			n, p = line:match('^.-\"(.-)\" | (.*) | ' .. esc_string(log_length_text) .. '(.*)')
 		else
 			p = line:match('[(.*)%]]%s(.*) | ' .. esc_string(log_length_text) .. '(.*)')
+			if not p then return nil end
 			d, n, e = p:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$')
 		end
 		dt = line:match('%[(.-)%]')
 		t = line:match(' | ' .. esc_string(log_time_text) .. '(%d*%.?%d*)(.*)$')
 		ln = line:match(' | ' .. esc_string(log_length_text) .. '(%d*%.?%d*)(.*)$')
-		r = tonumber(ln) - tonumber(t)
+		r = (tonumber(ln) or 0) - (tonumber(t) or 0)
 		l = line
 		line_pos = line_pos + 1
 		return {found_path = p, found_time = t, found_name = n, found_title = tt, found_line = l, found_sequence = line_pos, found_directory = d, found_datetime = dt, found_length = ln, found_remaining = r}
@@ -2187,6 +2188,15 @@ end
 function history_resume()
 	if filePath == nil then
 		list_contents = read_log_table()
+		if list_contents and list_contents[1] then
+			for i = #list_contents, 1, -1 do
+				local entry = list_contents[i]
+				if entry and entry.found_path and (file_exists(entry.found_path) or starts_protocol(protocols, entry.found_path)) then
+					load(#list_contents - i + 1)
+					return
+				end
+			end
+		end
 		load(1)
 	elseif filePath ~= nil then
 		list_contents = read_log_table()
