@@ -1,54 +1,134 @@
 ====================================================================
-MPV: UOSC x Modern Z Edition — Update Log
-Date: 2026-11-25
+MPV: UOSC x Modern Z Edition — Full Repository Update Log
 ====================================================================
 
-[UI & Visual Polish]
-- Timeline (Timeline.lua / uosc.conf):
-  * Restored slim, razor-sharp seekbar (1.5px base / 2px played, timeline_size=25)
-    with muted gray unwatched track vs. bright #008cfb watched progress.
-  * Added crisp dark halo border around the scrubber knob and subtle scrub dot
-    when hovering directly on the seekbar.
-  * Repositioned sky-cyan chapter diamonds cleanly above the track.
-  * Added estimated finish clock time to the seekbar hover tooltip
-    (timeline_hover_clock=yes).
-  * Fixed chapter_range_patterns substring matching so chapters don't paint the
-    entire unwatched bar blue.
-- Top Bar (TopBar.lua / uosc.conf):
-  * Added smooth feathered top gradient shadow for readability over bright scenes.
-  * Added live real-time clock badge next to window controls (top_bar_clock=yes).
-  * Updated frosted glass pill styling (border_radius=6, translucent title/tooltip).
-- Controls & Buttons (Controls.lua / Button.lua / CycleButton.lua / Speed.lua / main.lua):
-  * Fixed missing config.color.accent definition so active toggle icons stay
-    lit in #008cfb light blue.
-  * True-centered middle playback controls (prev, -10s, play/pause, +10s, next)
-    at 50% screen width regardless of left/right button counts.
-  * Upgraded button hover states, rounded count badges, and light-blue active
-    highlight for the Speed pill when playback speed != 1.0x.
+--------------------------------------------------------------------
+[11] 2026-11-25 | Commit: 0fd199c
+feat: polish uosc UI, fix seekbar contrast, add Remaster & Night Mode, clean bloat, add update_log.txt
+--------------------------------------------------------------------
+- UI & Visual Polish:
+  * Timeline (Timeline.lua / uosc.conf): Restored slim 1.5px/2px seekbar
+    (timeline_size=25) with muted gray unwatched track vs. bright #008cfb
+    watched progress, crisp handle halo, subtle hover scrub dot, sky-cyan
+    chapter diamonds above the track, and hover tooltip finish-time clock
+    (timeline_hover_clock=yes). Fixed chapter_range_patterns substring bug.
+  * Top Bar (TopBar.lua / uosc.conf): Added smooth top feathered gradient
+    shadow, frosted translucent pills (border_radius=6), and live real-time
+    clock badge (top_bar_clock=yes).
+  * Controls & Buttons (Controls.lua / Button.lua / CycleButton.lua / Speed.lua / main.lua):
+    Fixed missing config.color.accent definition so active toggles stay lit in
+    #008cfb blue; true-centered middle playback controls; polished hover states,
+    badges, and speed pill highlight when speed != 1.0x.
+- New Features:
+  * Remaster Vivid (uosc/remaster, Alt+r, Sparkle button): Default ON
+    (remaster=yes); sets target-peak=140, brightness=0, contrast=4, saturation=5.
+  * Night Mode / Voice Boost (uosc/night-mode, Alt+n, Moon button): Toggles
+    dynaudnorm audio normalization (@night_mode:lavfi=[dynaudnorm=f=75:g=25:p=0.55]).
+  * Binge Mode: Enabled uosc native autoload=yes with keep-open=yes and
+    keep-open-pause=no to auto-play next episode without playlist clutter.
+  * Lightweight Skip Intro (scripts/skip-intro.lua / script-opts/skip-intro.conf):
+    Replaced heavy 100x silencedetect/blackout filter script with zero-overhead
+    chapter-based Skip Intro banner (Tab / z, 85s fallback); original script
+    backed up to backups/skip-intro.original.lua & .conf.
+- Performance & Bloat Cleanup:
+  * Removed deprecated tone-mapping-mode=auto from mpv.conf and unknown keys
+    from uosc.conf.
+  * Removed dead/duplicate scripts and configs: scripts/lock.lua,
+    scripts/copy-paste-URL.lua, scripts/menu.lua, script-opts/menu.json,
+    scripts/select.lua, scripts/autoload.lua, script-opts/autoload.conf,
+    script-opts/SmartCopyPaste.lua, script-opts/uosc_history.conf.
+  * Added update_log.txt and exempted it in .gitignore.
 
-[New Features]
-- Remaster Vivid Toggle (uosc/remaster, Alt+r, Sparkle button):
-  * Enabled by default (remaster=yes in uosc.conf).
-  * Applies target-peak=140, brightness=0, contrast=4, saturation=5; toggles
-    cleanly back to auto/0 on click or Alt+r.
-- Night Mode / Voice Boost (uosc/night-mode, Alt+n, Moon button):
-  * Toggles dynaudnorm audio normalization (@night_mode:lavfi=[dynaudnorm=f=75:g=25:p=0.55])
-    to lift quiet dialogue and tame loud peaks.
-- Binge Mode (uosc.conf / mpv.conf):
-  * Switched from folder-dumping autoload.lua to uosc native autoload=yes with
-    keep-open=yes and keep-open-pause=no — auto-plays the next file in the
-    folder without cluttering the playlist.
-- Lightweight Skip Intro (scripts/skip-intro.lua / script-opts/skip-intro.conf):
-  * Replaced heavy 100x silencedetect/blackout filter script with zero-overhead
-    chapter-based Netflix-style Skip Intro banner (Tab / z, 85s fallback).
-  * Original script safely backed up to backups/skip-intro.original.lua &
-    backups/skip-intro.original.conf.
+--------------------------------------------------------------------
+[10] 2026-11-14 | Commit: 3e96b21
+feat: add dynamic finish time, light blue progress bar, Asap Condensed subtitle fonts, and UI improvements
+--------------------------------------------------------------------
+- Timeline & End Time (Timeline.lua / main.lua / uosc.conf):
+  * Added dynamic real-world "Ends X:XX PM" finish timestamp below
+    destination time (timeline_end_time=yes, timeline_end_time_format=12h),
+    accounting for playback speed and live clock updates while paused.
+  * Fixed ASS BGR color inversion so progress bar and handle render in #008cfb
+    light blue (configurable via timeline_color).
+- Subtitle Fonts & Config (mpv.conf / fonts/):
+  * Added AsapCondensed-Medium.ttf, AsapCondensed-SemiBold.ttf, and
+    AsapCondensed-Bold.ttf; configured crisp subtitle styling with Asap
+    Condensed Medium.
+  * Fixed screenshot-template syntax and disabled duplicate built-in osc=no.
+- Controls & Cleanup:
+  * Added screenshot camera button to uosc controls bar.
+  * Removed archived scripts/helpfiles/ folder.
 
-[Performance & Bloat Cleanup]
-- Removed deprecated tone-mapping-mode=auto from mpv.conf.
-- Removed unknown/deprecated keys from uosc.conf.
-- Removed dead/duplicate scripts and configs: scripts/lock.lua,
-  scripts/copy-paste-URL.lua, scripts/menu.lua, script-opts/menu.json,
-  scripts/select.lua, scripts/autoload.lua, script-opts/autoload.conf,
-  script-opts/SmartCopyPaste.lua, script-opts/uosc_history.conf.
+--------------------------------------------------------------------
+[9] 2026-03-09 | Commit: 438126b
+feat: add right-click subtitle context menu with external file loading
+--------------------------------------------------------------------
+- Button.lua: Added on_right_click prop support via secondary_down zone.
+- Controls.lua: Wired right-click on subtitle button to open context menu
+  (Subtitle tracks / Load subtitle file / Download subtitles).
+- menus.lua: Opened track list and file browser menus with mouse_nav=true
+  for immediate mouse left-click and scroll navigation.
+
+--------------------------------------------------------------------
+[8] 2026-02-28 | Commit: 2ec6013
+Update README.md
+--------------------------------------------------------------------
+- Updated README.md screenshot preview link and formatting.
+
+--------------------------------------------------------------------
+[7] 2026-02-28 | Commit: ea1e037
+readme edit
+--------------------------------------------------------------------
+- Expanded README.md media preview section and layout notes.
+
+--------------------------------------------------------------------
+[6] 2026-02-28 | Commit: 733de17
+Enhance UOSC UI, add quick-scroll audio/sub switching, right-click close, fix autoload & resume
+--------------------------------------------------------------------
+- Enhanced UOSC UI across Button, Controls, Menu, PauseIndicator, Timeline,
+  TopBar, Volume, ass.lua, and menus.lua (ModernZ Fluent iconography, smooth
+  bottom shadow fade, refined timeline & handle pill).
+- Added left-click / mouse-wheel quick-scroll track switching for Audio and
+  Subtitle buttons with OSD feedback, plus right-click menu dismissal.
+- Added standalone scripts/autoload.lua and updated SimpleHistory.lua /
+  autoload.conf / uosc.conf; organized backup files under scripts/helpfiles/.
+
+--------------------------------------------------------------------
+[5] 2026-02-28 | Commit: 11cce89
+Add thorough README detailing features
+--------------------------------------------------------------------
+- Added README.md documenting UI design, SimpleHistory, scripts, shaders,
+  and installation instructions.
+
+--------------------------------------------------------------------
+[4] 2026-02-28 | Commit: 071ca6b
+Initial commit of customized MPV and UOSC configuration
+--------------------------------------------------------------------
+- Upgraded uosc (elements, libs, intl translations, ziggy binaries) and
+  added Fluent System Icons & Material Design Icons fonts.
+- Added SimpleHistory.lua & SimpleHistory.conf for playback history & resume,
+  select.lua, and autoload.conf.
+- Added NVScaler.glsl and filmgrain-light.glsl shaders, updated mpv.conf /
+  input.conf / uosc.conf, and added .gitignore rules.
+
+--------------------------------------------------------------------
+[3] 2025-08-07 | Commit: 15e3b88
+added anime upscaler
+--------------------------------------------------------------------
+- Moved Anime4K GLSL shaders from shaders/.snime/ into shaders/.
+- Added Anime4K shader keybindings to input.conf and archived older
+  mpv.conf / input.conf snapshots in original files/.
+
+--------------------------------------------------------------------
+[2] 2025-07-28 | Commit: 0151b7f
+Add .gitignore to exclude mpv.exe
+--------------------------------------------------------------------
+- Added initial .gitignore to keep mpv.exe out of version control.
+
+--------------------------------------------------------------------
+[1] 2025-07-28 | Commit: f82af5e
+first commit without mpv.exe
+--------------------------------------------------------------------
+- Initial repository upload: core mpv.conf, input.conf, uosc, thumbfast,
+  playlistmanager, SmartCopyPaste, copy-paste-URL, menu, skip-intro,
+  trackselect, webm, uosc icon/texture fonts, and Anime4K shaders.
 ====================================================================
