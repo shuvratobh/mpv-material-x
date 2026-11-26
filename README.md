@@ -1,6 +1,6 @@
-# MPV: Material OSC Revolution Edition (v2.0)
+# MPV: Material OSC Revolution Edition (v3.0)
 
-> **Evolution Notice (v2.0):** This repository evolved from the **UOSC × Modern Z** build into a custom-engineered **Material OSC** frontend — preserving all shaders, `SimpleHistory` auto-resume, `Thumbfast` previews, and hotkeys while upgrading every control into a responsive Material Design 3 interface. See [update_log.txt](update_log.txt) for the full commit-by-commit changelog from v1 to v2.
+> **Release Notice (v3.0):** Evolved from the **UOSC × Modern Z** build into a custom-engineered **Material OSC** frontend — preserving all shaders, `SimpleHistory` auto-resume, `Thumbfast` previews, and hotkeys while fixing all major UI/input bugs in v3.0. See [update_log.txt](update_log.txt) for earlier v1→v2 history.
 
 A heavily customized, GPU-accelerated setup for the [mpv media player](https://mpv.io/) on Windows (`vo=gpu`, `gpu-api=vulkan`, `hwdec=nvdec`).
 
@@ -28,7 +28,22 @@ A heavily customized, GPU-accelerated setup for the [mpv media player](https://m
 
 ---
 
-## ✨ What's New in v2.0
+## ✨ What's New in v3.0
+
+### 🖱️ Smart Mouse & Edge-Seek Controls
+- **Double-Click Edge Seeking (`-5s` / `+5s`):** Left double-click the left or right **15%** of the screen to seek `-5s` / `+5s` (`seeking_zone_percentage=15`, `seek_step_seconds=5`).
+- **Context-Locked Safety:** Edge seeking and center double-click fullscreen are automatically locked whenever any menu, Playlist, Settings, Subtitles, or `SimpleHistory` panel is open.
+- **Instant Header Buttons & Switch-Bounce Protection:** Back (`<-`), Close (`X`), and Subtitle Settings buttons respond immediately on the first click, with a 60 ms `mbtn_left` debounce guard to filter worn-switch double/triple bounces without blocking intentional double-clicks.
+- **Center Double-Click Fullscreen & Right-Click Pause:** Double-clicking the center 70% toggles fullscreen; `MBTN_RIGHT` toggles Play/Pause; single left-click play/pause remains disabled.
+
+### 🛠️ Stability & YouTube Fixes
+- **Clean `thumbfast.conf`:** Replaced corrupted HTML config with a clean 30-line `thumbfast.conf` eliminating startup config warnings.
+- **Single-Load Script Architecture:** Keep `mpv.exe` outside `%AppData%\mpv` so scripts and keybindings never load twice.
+- **YouTube Paste (`Ctrl+V` / `SmartCopyPaste`):** Configured `idle=yes`, `running_paste_behavior=force`, `no-playlist=`, Node.js `js-runtimes`, and progressive stream format fallback in [mpv.conf](mpv.conf).
+
+---
+
+## ✨ Core Material OSC Features (v2.0+)
 
 ### 🎨 Custom Material OSC Interface
 - **Top-Left Frosted Media Title Pill:** Displays the current video title cleanly at the top-left of the frame and fades smoothly with the controller.
@@ -45,7 +60,7 @@ A heavily customized, GPU-accelerated setup for the [mpv media player](https://m
   - **Bookmark (`bookmark_add` / `B`):** One-click timeline bookmarking (`Bookmark N >` chapter chips).
   - **Screenshot (`photo_camera` / `s`):** Captures with subtitles to `X:/Screenshots` (`mpv-%f-%n`) and prints the saved path via `osd-msg`.
   - **Fullscreen (`fullscreen`):** Toggle fullscreen without PiP clutter.
-- **Clean Mouse Behavior:** Right-click toggles Play/Pause (`MBTN_RIGHT cycle pause`), left-click play/pause and `±5s` accidental edge-seek overlays disabled.
+- **Clean Mouse Behavior:** Right-click toggles Play/Pause (`MBTN_RIGHT cycle pause`), left double-click on center toggles Fullscreen, left double-click on left/right 15% edges seeks `±5s` (locked when panels are open), and single left-click play/pause is disabled.
 
 ---
 
@@ -71,7 +86,8 @@ Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`
 ### UI, Playback & Scripts
 | Key | Action |
 | :--- | :--- |
-| **`Right Click`** | Play / Pause (`MBTN_RIGHT`; left-click play/pause disabled) |
+| **`Right Click`** | Play / Pause (`MBTN_RIGHT`; single left-click play/pause disabled) |
+| **`Left Double-Click`** | **Center:** Toggle Fullscreen · **Left / Right 15% Edges:** Seek **`-5s` / `+5s`** (locked in menus/panels) |
 | **`h` / `H`** | Open **SimpleHistory** list |
 | **`Ctrl + Y`** | Load and resume last played item |
 | **`Ctrl + H`** | Toggle **SimpleHistory** incognito mode |
@@ -113,7 +129,7 @@ Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`
 ---
 
 ## ⚙️ Installation (Windows)
-1. Install a recent **mpv** Windows build with Vulkan/FFmpeg support.
+1. Install a recent **mpv** Windows build with Vulkan/FFmpeg support into its **own** folder (e.g., `C:\Users\<Username>\mpv-player\`) — **do not** place `mpv.exe` inside `%AppData%\mpv`, or mpv will load every script twice.
 2. Clone this repository into `%AppData%\mpv` (`C:\Users\<Username>\AppData\Roaming\mpv`).
 3. Place `ffmpeg.exe` in your `mpv` folder (or on `PATH`) for `mpv-easy-cut` exports, and update `screenshot-directory` in [mpv.conf](mpv.conf) / `output-directory` in [mpv-easy-cut.conf](script-opts/mpv-easy-cut.conf) if needed.
 
