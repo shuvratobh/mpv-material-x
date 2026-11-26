@@ -14,7 +14,7 @@ A heavily customized, GPU-accelerated setup for the [mpv media player](https://m
 ### Thumbfast Thumbnail Preview
 ![Thumbfast Preview](assets/thumbfast-preview.jpg)
 
-### Gear Settings Menu & Auto Skip Banner
+### Gear Settings Menu
 ![Settings Menu](assets/settings-menu.jpg)
 
 ### Subtitle Delay & Sync Suite (`Type` / Smooth Slider / `Voice Heard` & `Subtitle Seen`)
@@ -22,6 +22,9 @@ A heavily customized, GPU-accelerated setup for the [mpv media player](https://m
 
 ### Dedicated History Button (`SimpleHistory` Overlay)
 ![SimpleHistory Overlay](assets/history-overlay.jpg)
+
+### Anime4K Upscaling (`Mode C+A Fast`)
+![Anime4K Shader](assets/anime4k-shader.jpg)
 
 ---
 
