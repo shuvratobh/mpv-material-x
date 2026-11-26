@@ -60,9 +60,52 @@ Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`
 
 ## 🧰 Scripts, History & Shaders
 - **Resilient `SimpleHistory` Auto-Resume:** Automatically resumes your last watched video on launch, skips missing/unsupported entries safely, and blacklists synthetic `av://` / `lavfi:` streams.
-- **Lightweight `skip-intro.lua` (`Tab` / `z`):** Chapter-aware Skip Intro overlay with minimal overhead.
-- **Shaders (`Ctrl+1` / `Ctrl+2` / `Ctrl+3` / `j`):** Anime4K, FSRCNNX / KrigBilateral / SSimSuperRes, NVScaler + FilmGrain-Light.
+- **Lightweight `skip-intro.lua` (`Tab` / `z`):** Chapter-aware Skip Intro jump (85s fallback when no intro chapter exists).
+- **Shaders (`kp8`, `kp9`, `Ctrl+6`, `Ctrl+2`, `Ctrl+3`, `j`, `g`, `kp7`):** Anime4K, FSRCNNX / KrigBilateral / SSimSuperRes, NVScaler + FilmGrain-Light.
 - **`playlistmanager.lua`, `SmartCopyPaste.lua`, `trackselect.lua`, `webm.lua`, `thumbfast.lua`.**
+
+---
+
+## ⌨️ Unique Keybindings
+
+### UI, Playback & Scripts
+| Key | Action |
+| :--- | :--- |
+| **`Right Click`** | Play / Pause (`MBTN_RIGHT`; left-click play/pause disabled) |
+| **`h` / `H`** | Open **SimpleHistory** list |
+| **`Ctrl + Y`** | Load and resume last played item |
+| **`Ctrl + H`** | Toggle **SimpleHistory** incognito mode |
+| **`Alt + p`** | Toggle Material OSC **Playlist** drawer |
+| **`Shift + Enter`** | Open `playlistmanager` OSD playlist |
+| **`Ctrl + ,`** | Toggle Material OSC **Settings** (`Gear`) menu |
+| **`B` / `b`** | Add timeline **Bookmark** |
+| **`Alt + n`** | Toggle **Night Mode / Voice Boost** (`dynaudnorm`) |
+| **`Alt + r`** | Toggle **Remaster Vivid** (`target-peak=140`, contrast `+4`, saturation `+5`) |
+| **`z`** *(or `Tab`)* | Skip Intro (`skip-intro.lua`) |
+| **`s`** *(or Camera icon)* | Capture screenshot with subtitles (`X:/Screenshots`, shows save path OSD) |
+
+### Subtitles, Framing & Color
+| Key | Action |
+| :--- | :--- |
+| **`c` / `x`** | Shift subtitle delay **`-0.05s` / `+0.05s`** |
+| **`Alt + v`** | Instant **Voice-to-Subtitle Sync** (1-press syncs first `.srt`/`.ass`/`.vtt` line to voice; 2-press syncs embedded subs) |
+| **`Ctrl + s`** | Shrink & raise subtitles (`sub-pos -10`, `sub-scale -0.31111`) |
+| **`o`** | Set aspect ratio **`1.43:1`** (IMAX) |
+| **`Alt + x` / `Alt + c`** | Zoom out & pan frame / Reset video zoom & pan |
+| **`Ctrl + 1` / `Ctrl + 0`** | **Color Boost** (`brightness 3, saturation 5, gamma -1`) / Reset all color values to `0` |
+| **`kp1` / `kp2` / `kp3`** | HDR reset (`spline`, peak `180`) / Cycle `target-peak` (`130–203`) / Cycle `tone-mapping` |
+| **`kp4` / `kp5` / `kp6`** | Set speed **`1.5x`** / **`1.0x`** / **`1.25x`** |
+
+### GLSL Shaders (`Numpad` & `Ctrl`)
+| Key | Shader Preset |
+| :--- | :--- |
+| **`kp8`** / **`Ctrl + 6`** | **Anime4K: Mode C+A (Fast)** |
+| **`kp9`** | **Anime4K: Mode A+A (Fast)** |
+| **`Ctrl + 2`** | **FSRCNNX x2 (`8-0-4-1`)** Movie Upscaler |
+| **`Ctrl + 3`** | **KrigBilateral + SSimSuperRes + FSRCNNX x2** (Max Quality) |
+| **`j`** | **FilmGrain-Light + NVScaler** (Nvidia SuperResolution) |
+| **`g`** | **FilmGrain Only** |
+| **`kp7`** | Clear all active GLSL shaders |
 
 ---
 
