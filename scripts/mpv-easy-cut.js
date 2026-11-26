@@ -12065,7 +12065,7 @@ var _Xl$_ = _objectSpread(_objectSpread({}, Xl), _1("mpv-easy-cut", {
 function B1() {
   var _Ht$0$toFixed, _Ht$, _Ht$1$toFixed, _Ht$2;
   var e = [(_Ht$0$toFixed = (_Ht$ = Ht[0]) === null || _Ht$ === void 0 ? void 0 : _Ht$.toFixed(2)) !== null && _Ht$0$toFixed !== void 0 ? _Ht$0$toFixed : "?", (_Ht$1$toFixed = (_Ht$2 = Ht[1]) === null || _Ht$2 === void 0 ? void 0 : _Ht$2.toFixed(2)) !== null && _Ht$1$toFixed !== void 0 ? _Ht$1$toFixed : "?"].join(" => ");
-  Se(e, -1);
+  Se(e, 3);
 }
 function pH() {
   Ht = C1(Ht, lH.value), B1();
