@@ -6,6 +6,25 @@ A heavily customized, GPU-accelerated setup for the [mpv media player](https://m
 
 ---
 
+## 📸 Screenshots
+
+### Main Material UI & Dynamic Finish Clock
+![Main Material UI](assets/main-ui.jpg)
+
+### Thumbfast Thumbnail Preview
+![Thumbfast Preview](assets/thumbfast-preview.jpg)
+
+### Gear Settings Menu & Auto Skip Banner
+![Settings Menu](assets/settings-menu.jpg)
+
+### Subtitle Delay & Sync Suite (`Type` / Smooth Slider / `Voice Heard` & `Subtitle Seen`)
+![Subtitle Delay & Sync Suite](assets/subtitle-sync.jpg)
+
+### Dedicated History Button (`SimpleHistory` Overlay)
+![SimpleHistory Overlay](assets/history-overlay.jpg)
+
+---
+
 ## ✨ What's New in v2.0
 
 ### 🎨 Custom Material OSC Interface
