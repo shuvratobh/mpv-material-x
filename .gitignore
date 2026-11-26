@@ -1,5 +1,6 @@
 # Executables and libraries
 mpv.exe
+ffmpeg.exe
 *.dll
 
 # Logs and debug files

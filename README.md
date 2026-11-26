@@ -62,7 +62,7 @@ Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`
 - **Resilient `SimpleHistory` Auto-Resume:** Automatically resumes your last watched video on launch, skips missing/unsupported entries safely, and blacklists synthetic `av://` / `lavfi:` streams.
 - **Lightweight `skip-intro.lua` (`Tab` / `z`):** Chapter-aware Skip Intro jump (85s fallback when no intro chapter exists).
 - **Shaders (`kp8`, `kp9`, `Ctrl+6`, `Ctrl+2`, `Ctrl+3`, `j`, `g`, `kp7`):** Anime4K, FSRCNNX / KrigBilateral / SSimSuperRes, NVScaler + FilmGrain-Light.
-- **`playlistmanager.lua`, `SmartCopyPaste.lua`, `trackselect.lua`, `webm.lua`, `thumbfast.lua`.**
+- **`playlistmanager.lua`, `SmartCopyPaste.lua`, `trackselect.lua`, `webm.lua`, `thumbfast.lua`, `mpv-easy-cut.js`.**
 
 ---
 
@@ -83,6 +83,9 @@ Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`
 | **`Alt + r`** | Toggle **Remaster Vivid** (`target-peak=140`, contrast `+4`, saturation `+5`) |
 | **`z`** *(or `Tab`)* | Skip Intro (`skip-intro.lua`) |
 | **`s`** *(or Camera icon)* | Capture screenshot with subtitles (`X:/Screenshots`, shows save path OSD) |
+| **`k`** | Mark Start / End cut point (`mpv-easy-cut`) |
+| **`g`** / **`Alt + g`** | Export Lossless Clip (`-c copy` → `X:/Screen Clips`) / Export GIF (`mpv-easy-cut`) |
+| **`Alt + BS`** | Cancel current `mpv-easy-cut` selection |
 
 ### Subtitles, Framing & Color
 | Key | Action |
@@ -104,7 +107,7 @@ Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`
 | **`Ctrl + 2`** | **FSRCNNX x2 (`8-0-4-1`)** Movie Upscaler |
 | **`Ctrl + 3`** | **KrigBilateral + SSimSuperRes + FSRCNNX x2** (Max Quality) |
 | **`j`** | **FilmGrain-Light + NVScaler** (Nvidia SuperResolution) |
-| **`g`** | **FilmGrain Only** |
+| **`Alt + f`** | **FilmGrain Only** |
 | **`kp7`** | Clear all active GLSL shaders |
 
 ---
@@ -112,4 +115,6 @@ Inside **Gear (`Settings`) → Subtitles → Subtitle Settings (`subtitles_gear`
 ## ⚙️ Installation (Windows)
 1. Install a recent **mpv** Windows build with Vulkan/FFmpeg support.
 2. Clone this repository into `%AppData%\mpv` (`C:\Users\<Username>\AppData\Roaming\mpv`).
-3. Update `screenshot-directory` in [mpv.conf](mpv.conf) if you don't use `X:/Screenshots`.
+3. Place `ffmpeg.exe` in your `mpv` folder (or on `PATH`) for `mpv-easy-cut` exports, and update `screenshot-directory` in [mpv.conf](mpv.conf) / `output-directory` in [mpv-easy-cut.conf](script-opts/mpv-easy-cut.conf) if needed.
+
+![Folder Structure](assets/folder-structure.jpg)
