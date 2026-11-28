@@ -1,14 +1,18 @@
-# MPV: Material OSC Revolution Edition (v3.1.0)
+# MPV: Material OSC Revolution Edition (v3.1.1)
 
-> **Release Notice (v3.1.0 · 3.x Series):** Upgraded to **Material OSC `0.0.15`** with bundled `Material Symbols Rounded` & `Google Sans Flex` fonts, horizontal volume slider, speed-only hover tooltip, real `NVScaler`/`NVSharpen` `v1.0.3` shaders, and a complete QoL script suite (`file-browser`, `notify_skip`, `mpvshot` with instant clipboard + `Alt+s` reveal, `locatefile`, `trash_after_watch`, and `smart_track_selector`). See [update_log.txt](update_log.txt) for earlier v1→v2 history.
+> **Release Notice (v3.1.1 · 3.x Series):** Smooth 144 Hz Windows playback (`gpu-api=d3d11`, `hwdec=auto-safe` / `d3d11va`, `video-sync=display-resample`, `tscale=oversample`) + zero-`vf` `notify_skip`, built on **Material OSC `0.0.15`** and the complete QoL script suite. See [update_log.txt](update_log.txt) for earlier v1→v2 history.
 
-A heavily customized, GPU-accelerated setup for the [mpv media player](https://mpv.io/) on Windows (`vo=gpu`, `gpu-api=vulkan`, `hwdec=nvdec`).
+A heavily customized, GPU-accelerated setup for the [mpv media player](https://mpv.io/) on Windows (`vo=gpu`, `gpu-api=d3d11`, `hwdec=auto-safe`).
 
 ---
 
 ## 📦 Version History (`3.x`)
 
-- **`v3.1.0` (Current):**
+- **`v3.1.1` (Current):**
+  - **Smooth 144 Hz Playback Fix:** Switched `gpu-api=d3d11` + `hwdec=auto-safe` (native `d3d11va` zero-copy decode) + `video-sync=display-resample` + `interpolation=yes` + `tscale=oversample` in [mpv.conf](mpv.conf), eliminating `winvk` 144 Hz swapchain jitter and output frame drops.
+  - **Zero Video-Filter Overhead (`notify_skip`):** Removed background `vf` `blackdetect_notify` so hardware decoding stays zero-copy while chapter, audio silence, and subtitle music detection remain active.
+
+- **`v3.1.0`:**
   - **Material OSC `0.0.15`:** Horizontal volume slider, updated `Material Symbols Rounded` + `Google Sans Flex` fonts, **Speed-only tooltip** (`Speed: 1.1x` without tooltip clutter on other buttons), **Shaders** & **Audio Mastering** Gear submenus.
   - **Smart File & Media Tools:**
     - `file-browser` (**`/`** or **Numpad `/`**) — browse drives and folders right inside mpv.

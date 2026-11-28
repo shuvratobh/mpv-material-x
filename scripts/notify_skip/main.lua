@@ -256,8 +256,7 @@ function set_filter_state(property, label, is_enabled)
 end
 
 function init_notification_filters()
-    init_filter('vf', 'blackdetect_notify', 'lavfi', { graph = 'blackdetect=' .. opts.blackdetect_notify_args })
-    mp.msg.info("blackdetect_notify initialized")
+    -- Audio-only notification filter keeps hwdec=nvdec zero-copy (no CPU vf readback)
     init_filter('af', 'silencedetect_notify', 'lavfi', { graph = 'silencedetect=' .. opts.silencedetect_notify_args })
     mp.msg.info("silencedetect_notify initialized")
 end
@@ -265,12 +264,8 @@ end
 function init_skipping_filters()
     init_filter('af', 'silencedetect_skip', 'lavfi', { graph = 'silencedetect=' .. opts.silencedetect_skip_args })
     mp.msg.info("silencedetect_skip initialized")
-    init_filter('vf', 'blackdetect_skip', 'lavfi', { graph = 'blackdetect=' .. opts.blackdetect_skip_args })
-    mp.msg.info("blackdetect_skip initialized")
-
-    -- Disable skip filters by default
+    -- Disable skip filters by default; blackdetect_skip is added only while fast-forward skipping
     set_filter_state('af', 'silencedetect_skip', false)
-    set_filter_state('vf', 'blackdetect_skip', false)
 end
 
 -- Notification detection functions
@@ -399,7 +394,8 @@ function start_silence_skip()
     state.blackframe_skip_active = true
     state.detection.skipping_active = true
     
-    -- Activate skip detection filters
+    -- Activate skip detection filters (attach blackdetect_skip only for active fast-forward)
+    init_filter('vf', 'blackdetect_skip', 'lavfi', { graph = 'blackdetect=' .. opts.blackdetect_skip_args })
     set_filter_state('af', 'silencedetect_skip', true)
     set_filter_state('vf', 'blackdetect_skip', true)
     
@@ -435,9 +431,9 @@ function stop_silence_skip()
     state.blackframe_skip_active = false
     state.detection.skipping_active = false
     
-    -- Deactivate skip detection filters
+    -- Deactivate skip detection filters and remove vf so hwdec stays zero-copy
     set_filter_state('af', 'silencedetect_skip', false)
-    set_filter_state('vf', 'blackdetect_skip', false)
+    mp.commandv('vf', 'remove', '@blackdetect_skip')
     
     -- Remove observers
     if state.observers.silencedetect_skip then
@@ -461,13 +457,9 @@ function start_notification_filters()
     if state.detection.notification_active then return end
     state.detection.notification_active = true
     
-    set_filter_state('vf', 'blackdetect_notify', true)
     set_filter_state('af', 'silencedetect_notify', true)
 
-    state.observers.blackdetect_notify = function(n, v) notification_trigger(n, v, "blackdetect") end
     state.observers.silencedetect_notify = function(n, v) notification_trigger(n, v, "silencedetect") end
-    
-    mp.observe_property('vf-metadata/blackdetect_notify', 'string', state.observers.blackdetect_notify)
     mp.observe_property('af-metadata/silencedetect_notify', 'string', state.observers.silencedetect_notify)
     
     mp.msg.info("Notification detection filters started")
@@ -477,13 +469,8 @@ function stop_notification_filters()
     if not state.detection.notification_active then return end
     state.detection.notification_active = false
     
-    set_filter_state('vf', 'blackdetect_notify', false)
     set_filter_state('af', 'silencedetect_notify', false)
 
-    if state.observers.blackdetect_notify then
-        mp.unobserve_property(state.observers.blackdetect_notify)
-        state.observers.blackdetect_notify = nil
-    end
     if state.observers.silencedetect_notify then
         mp.unobserve_property(state.observers.silencedetect_notify)
         state.observers.silencedetect_notify = nil
