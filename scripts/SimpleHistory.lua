@@ -1979,12 +1979,12 @@ function history_blacklist_check()
 		msg.info(blacklist_msg)
 		return invertable_return[1]
 	elseif not starts_protocol(protocols, filePath) then
-		if has_value(o.history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'), nil) or 
-		has_value(o.history_blacklist, filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$'):gsub('\\$', ''), nil) then
+		local base_dir = filePath:match('^(.-)([^\\/]-)%.([^\\/%.]-)%.?$')
+		local ext_only = filePath:match('%.([^%.]+)$')
+		if base_dir and (has_value(o.history_blacklist, base_dir, nil) or has_value(o.history_blacklist, base_dir:gsub('\\$', ''), nil)) then
 			msg.info(blacklist_msg)
 			return invertable_return[1]
-		elseif has_value(o.history_blacklist, filePath:match('%.([^%.]+)$'), nil) or
-		has_value(o.history_blacklist, "."..filePath:match('%.([^%.]+)$'), nil) then
+		elseif ext_only and (has_value(o.history_blacklist, ext_only, nil) or has_value(o.history_blacklist, "."..ext_only, nil)) then
 			msg.info(blacklist_msg)
 			return invertable_return[1]
 		else
